@@ -1,13 +1,13 @@
 #include <ReadMwPLC.h>
 #include <Arduino.h>
-//#include <EthernetENC.h> ESTA NO SE AGREGO PORQUE YA TENGO LA LIB MODBUS_ESP8266
+//#include <EthernetENC.h>   ESTA NO SE AGREGO PORQUE YA TENGO LA LIB MODBUS_ESP8266
 #include <Ethernet.h>
 #include <ModbusEthernet.h>
 #include <ThingSpeak.h>
 #include <ESP8266HTTPClient.h>
 #include <UrlEncode.h>
 
-byte mac[] = {0x52, 0x02, 0x91, 0x78, 0xF9, 0xD4}; ///MAC del controlador ESP8266
+byte mac[] = {0x52, 0x02, 0x91, 0x78, 0xF9, 0xD4}; ///MAC   del controlador ESP8266
 IPAddress ip(192, 168, 51, 153); // IP del taller
 ModbusEthernet MB;               // objeto intancia Modbus TCP
 IPAddress PLC(192, 168, 56, 210); // IP del PLC 
@@ -21,7 +21,7 @@ void sendMessage(String message);
 
 // ////prueva thingspeak
 unsigned long ID_CANAL = 2251797; // ID del canal
-const char *Llave_WriteAPI = "WH8KOIMZN34TR97Y"; // llave para escribir
+const char *Llave_WriteAPI = "WH8KOIMZN34TR97Y"; // llave para escribir 
 const int Campo_1 = 1;
 const int Campo_2 = 2;
 const int Campo_3 = 3;

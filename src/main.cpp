@@ -52,7 +52,7 @@ void setup()
     //PLC221.Conect(); COMENTADO PARA PROBAR WSP
 }
 
-const int32_t showDelay = 60000;   // muestra valores cada 5min
+const int32_t showDelay = 60000;   // muestra valores cada 5min 300000 mills
 uint32_t showLast = 0;
 
 void loop()
