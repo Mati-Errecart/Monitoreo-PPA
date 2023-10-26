@@ -1,27 +1,23 @@
 #include <ReadMwPLC.h>
 #include <Arduino.h>
-//#include <EthernetENC.h>   ESTA NO SE AGREGO PORQUE YA TENGO LA LIB MODBUS_ESP8266
 #include <Ethernet.h>
 #include <ModbusEthernet.h>
 #include <ThingSpeak.h>
 #include <ESP8266HTTPClient.h>
 #include <UrlEncode.h>
 
-byte mac[] = {0x52, 0x02, 0x91, 0x78, 0xF9, 0xD4}; ///MAC   del controlador ESP8266
+byte mac[] = {0x52, 0x02, 0x91, 0x78, 0xF9, 0xD4}; ///MAC del controlador ESP8266
 IPAddress ip(192, 168, 51, 153); // IP del taller
 ModbusEthernet MB;               // objeto intancia Modbus TCP
 IPAddress PLC(192, 168, 56, 210); // IP del PLC 
 
 int _bit; // bit a leer
 
-// clave api y numero de telefeno para notificaciones de wtsp
-String apiKey = "8454636";  
+//numero de telefeno para notificaciones de wtsp
 String num_telefono = "+5493447552991"; 
 void sendMessage(String message);
 
-// ////prueva thingspeak
-unsigned long ID_CANAL = 2251797; // ID del canal
-const char *Llave_WriteAPI = "WH8KOIMZN34TR97Y"; // llave para escribir 
+// //// datos thingspeak
 const int Campo_1 = 1;
 const int Campo_2 = 2;
 const int Campo_3 = 3;
@@ -39,10 +35,10 @@ ReadMwPLC::ReadMwPLC(uint16_t varMw[]) //
 void ReadMwPLC::Conect()
 {   
       #if defined(AVR_LEONARDO)
-      while (!Serial) {}        // wait for serial port to connect. Needed for Leonardo only
+      while (!Serial) {}        //
       #endif
       Ethernet.init(16);         //CS pin
-      Ethernet.begin(mac, ip);  // Inicia enlace Ethernet desde el lab del taller
+      Ethernet.begin(mac, ip);  // Inicia enlace Ethernet 
       delay(1000);              // tiempo de espera para conectar el shield Ethernet
       MB.client();
 
@@ -62,6 +58,7 @@ void ReadMwPLC::ReadBegin()   // metodo para leer datos
     delay(100);    //
     MB.task();     // Tarea Modbus local comun
 }
+  //Realizar monitoreo solo en modo produccion revisar plc con 
 void ReadMwPLC::getEstado() 
 {   
     Serial.println("----------------TEMPERATURAS SALA DE PELADO-------------------");
@@ -74,11 +71,10 @@ void ReadMwPLC::getEstado()
     Serial.println("PELADORAS");
     Serial.println(float(_Valor[9])/10); //peladoras
     Serial.println();
-    Serial.println("--------------MONITOREO GENERAL-------------");
 
     for(int i=0; i<6; i++)
     {
-        if(i==0) // 102 FALLAS
+        if(i==0) // Mw102 FALLAS
         {
             for(int j=12; j<16; j++)
             {
@@ -118,7 +114,7 @@ void ReadMwPLC::getEstado()
             }
             
         }
-        if(i==1) ///// 103 FALLAS
+        if(i==1) ///// Mw103 FALLAS
         {
             for(int j=0; j<8; j++)
             {
@@ -177,59 +173,7 @@ void ReadMwPLC::getEstado()
                 }
             }
         }
-        if(i==5) ///// 118 FALLAS
-        {
-            for(int j=0; j<6; j++)
-            {
-                _bit= bitRead(_Valor[i],j);
-                switch (j)
-                {
-                case 0:
-                    if(_bit!=0)
-                    {
-                        Serial.println("FALLA Bomba Alimentacion T.Exterior");
-                        sendMessage("FALLA Bomba Alimentacion T.Exterior!");
-                    }
-                    
-                    break;
-                case 2:
-                    if (_bit!=0)
-                    {
-                        Serial.println("FALLA CALDERA");
-                        sendMessage("FALLA CALDERA!");
-                    }
-                    
-                    break;
-                case 3:
-                    if(_bit!=0)
-                    {
-                        Serial.println("PARADA EMERGENCIA: -GANCHO CAIDO-");
-                        sendMessage("PARADA EMERGENCIA: -GANCHO CAIDO-");
-                    }
-                    
-                    break;
-                case 4:
-                    if(_bit!=0)
-                    {
-                        Serial.println("PARADA DE EMERGENCIA PUENTEADA, REVISAR!");
-                        sendMessage("PARADA DE EMERGENCIA PUENTEADA, REVISAR!");
-                    }
-                    
-                    break;
-                case 5:
-                    if(_bit!=0)
-                    {
-                        Serial.println("ALARMA: -TEMPERATURA BAJA DE ESCALDADORES-");
-                        sendMessage("ALERTA, TEMPERATURA BAJA DE ESCALDADORES!");
-                    }
-                     
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-        if(i==2) ///// 105
+        if(i==2) ///// Mw105
         {
             _bit= bitRead(_Valor[i],15);
             if(_bit!=0)
@@ -238,7 +182,7 @@ void ReadMwPLC::getEstado()
                 sendMessage("PARADA EMERGENCIA: -CHILLERS-");
             }
         }
-        if(i==3) ///// 106 ESTADO DE NORIA Y PARADAS DE EMERGENCIA
+        if(i==3) ///// Mw106 ESTADO DE NORIA Y PARADAS DE EMERGENCIA
         {
             for(int j=0; j<16; j++)   
             {
@@ -316,7 +260,7 @@ void ReadMwPLC::getEstado()
                 }
             }
         }
-        if(i==4) ///// 107 PARADAS DE EMERGENCIA
+        if(i==4) ///// Mw107 PARADAS DE EMERGENCIA
         {
             for(int j=0; j<3; j++)
             {
@@ -339,27 +283,79 @@ void ReadMwPLC::getEstado()
                 }
             }
         }
+        if(i==5) ///// Mw118 FALLAS
+        {
+            for(int j=0; j<6; j++)
+            {
+                _bit= bitRead(_Valor[i],j);
+                switch (j)
+                {
+                case 0:
+                    if(_bit!=0)
+                    {
+                        Serial.println("FALLA Bomba Alimentacion T.Exterior");
+                        sendMessage("FALLA Bomba Alimentacion T.Exterior!");
+                    }
+                    
+                    break;
+                case 2:
+                    if (_bit!=0)
+                    {
+                        Serial.println("FALLA CALDERA");
+                        sendMessage("FALLA CALDERA!");
+                    }
+                    
+                    break;
+                case 3:
+                    if(_bit!=0)
+                    {
+                        Serial.println("PARADA EMERGENCIA: -GANCHO CAIDO-");
+                        sendMessage("PARADA EMERGENCIA: -GANCHO CAIDO-");
+                    }
+                    
+                    break;
+                case 4:
+                    if(_bit!=0)
+                    {
+                        Serial.println("PARADA DE EMERGENCIA PUENTEADA, REVISAR!");
+                        sendMessage("PARADA DE EMERGENCIA PUENTEADA, REVISAR!");
+                    }
+                    
+                    break;
+                case 5:
+                    if(_bit!=0)
+                    {
+                        Serial.println("ALARMA: -TEMPERATURA BAJA DE ESCALDADORES-");
+                        sendMessage("ALERTA, TEMPERATURA BAJA DE ESCALDADORES!");
+                    }
+                     
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
     }
 }
 void ReadMwPLC::UpdateDB() //metodo para actualizar base de datos
 {
     Serial.println();
-    Serial.println("---------------ACTUALIANDO BASE DE DATOS----------------------");
-    ThingSpeak.writeField(ID_CANAL, Campo_1, (float(_Valor[8]))/10, Llave_WriteAPI);
-    ThingSpeak.writeField(ID_CANAL, Campo_2, (float(_Valor[9]))/10, Llave_WriteAPI);
-    ThingSpeak.writeField(ID_CANAL, Campo_3, (float(_Valor[7]))/10, Llave_WriteAPI);
-    ThingSpeak.writeField(ID_CANAL, Campo_4, (float(_Valor[6]))/10, Llave_WriteAPI);
+    Serial.println("---------------ACTUALIZANDO BASE DE DATOS----------------------");
+    ThingSpeak.writeField(SECRET_CH_ID, Campo_1, (float(_Valor[8]))/10, SECRET_WRITE_APIKEY); //120 t° caldera
+    ThingSpeak.writeField(SECRET_CH_ID, Campo_2, (float(_Valor[9]))/10, SECRET_WRITE_APIKEY); //113 t° peladoras
+    ThingSpeak.writeField(SECRET_CH_ID, Campo_3, (float(_Valor[7]))/10, SECRET_WRITE_APIKEY); //110 t° esc1
+    ThingSpeak.writeField(SECRET_CH_ID, Campo_4, (float(_Valor[6]))/10, SECRET_WRITE_APIKEY); //115 t° esc2
 }
 
 void sendMessage(String message) //// METODO PARA ENVIAR NOTIFICACIONES A WHATSAPP
 {
   // Datos para enviar con HTTP POST
-  String url = "http://api.callmebot.com/whatsapp.php?phone=" + num_telefono + "&apikey=" + apiKey + "&text=" + urlEncode(message);
+  String url = "http://api.callmebot.com/whatsapp.php?phone=" + num_telefono + "&apikey=" + SECRET_API_KEY + "&text=" + urlEncode(message);
   WiFiClient client;    
   HTTPClient http;
   http.begin(client, url);
 
-  // Especificar encabezado de tipo de contenido
+  // Especifica encabezado del tipo de contenido
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   
   // Enviar solicitud HTTP POST
@@ -369,7 +365,7 @@ void sendMessage(String message) //// METODO PARA ENVIAR NOTIFICACIONES A WHATSA
     Serial.print("MENSAJE DE WHATSAPP ENVIADO");
   }
   else{
-    Serial.println("Error al enviar mensaje");
+    Serial.println("ERROR al enviar mensaje");
     Serial.print("HTTP response code: ");
     Serial.println(httpResponseCode);
   }
